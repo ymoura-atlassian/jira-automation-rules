@@ -1,0 +1,144 @@
+{
+  "cloud": true,
+  "rules": [
+    {
+      "name": "Alert Admins - JSM Mail Handler Monitor",
+      "state": "ENABLED",
+      "description": null,
+      "authorAccountId": "557058:f58131cb-b67d-43c7-b30d-6b58d40bd077",
+      "actor": {
+        "type": "ACCOUNT_ID",
+        "value": "557058:f58131cb-b67d-43c7-b30d-6b58d40bd077"
+      },
+      "created": 1662706711679,
+      "updated": 1662935090197,
+      "trigger": {
+        "id": "163359010",
+        "component": "TRIGGER",
+        "parentId": null,
+        "conditionParentId": null,
+        "schemaVersion": 1,
+        "type": "jira.jql.scheduled",
+        "value": {
+          "schedule": {
+            "cronExpression": "",
+            "method": "BASIC",
+            "rate": 0,
+            "rateInterval": 86400,
+            "rRule": "BEGIN:VEVENT\nDTSTART;TZID=Greenwich:20220911T190718\nRRULE:FREQ=HOURLY;INTERVAL=1;BYSECOND=0\nEND:VEVENT\n"
+          },
+          "jql": "",
+          "executionMode": "nosearch",
+          "onlyUpdatedIssues": true
+        },
+        "children": [],
+        "conditions": [],
+        "connectionId": null
+      },
+      "components": [
+        {
+          "id": "163359012",
+          "component": "ACTION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.create.variable",
+          "value": {
+            "id": "_customsmartvalue_id_1662705130817",
+            "name": { "type": "FREE", "value": "epochtimestamp" },
+            "type": "SMART",
+            "query": {
+              "type": "SMART",
+              "value": "{{#now}}func=minusHours(1), format=\"toMillis\"{{/}}"
+            },
+            "lazy": false
+          },
+          "children": [],
+          "conditions": [],
+          "connectionId": null
+        },
+        {
+          "id": "163359014",
+          "component": "ACTION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.issue.outgoing.webhook",
+          "value": {
+            "url": "{{BaseURL}}/rest/jira-email-processor-plugin/1.0/mail/audit/process/CHANNELXXXXXXXXXXXX?from={{epochtimestamp}}&statuses=FAILED",
+            "headers": [
+              {
+                "id": "_header_1662705328176",
+                "name": "Authorization",
+                "value": "Basic c2VydmljZWFjY291bnRhdGxhc3NpYW4uY29tOmNUVnlNbEJxTWtSNWNXaGhiVzFtWkZWeg=="
+              }
+            ],
+            "sendIssue": false,
+            "contentType": "empty",
+            "customBody": null,
+            "method": "GET",
+            "responseEnabled": true,
+            "continueOnErrorEnabled": false
+          },
+          "children": [],
+          "conditions": [],
+          "connectionId": null
+        },
+        {
+          "id": "163359016",
+          "component": "CONDITION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.comparator.condition",
+          "value": {
+            "first": "{{exists(webResponse.body.data.first)}}",
+            "second": "true",
+            "operator": "EQUALS"
+          },
+          "children": [],
+          "conditions": [],
+          "connectionId": null
+        },
+        {
+          "id": "163359018",
+          "component": "ACTION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 3,
+          "type": "jira.issue.outgoing.email",
+          "value": {
+            "fromName": "",
+            "replyTo": "",
+            "to": [
+              {
+                "type": "REFERENCE",
+                "value": "administrators",
+                "additional": "GROUP"
+              }
+            ],
+            "cc": [],
+            "bcc": [],
+            "subject": "{{webResponse.body.data.first.mailChannelName}} - Mail logs",
+            "body": "{{#webResponse.body.data}}\n<b>Error Message</b>: {{message}}\n<b>Sender</b>: {{fromAddress}}\n<b>Subject</b>: {{subject}}\n<b>Event Time</b>: {{createdDateTime}}\n---\n\n{{/}}",
+            "mimeType": "text/html",
+            "convertLineBreaks": true
+          },
+          "children": [],
+          "conditions": [],
+          "connectionId": null
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [],
+      "labels": [],
+      "tags": [],
+      "ruleScope": {
+        "resources": []
+      },
+      "writeAccessType": "UNRESTRICTED",
+      "collaborators": []
+    }
+  ]
+}
